@@ -1,4 +1,4 @@
-# Copyright 2021 AI Singapore
+# Copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -24,7 +24,7 @@ from peekingduck.pipeline.nodes.node import AbstractNode
 
 
 class Node(AbstractNode):
-    """Initialises and use HRNet model to infer poses from detected bboxes.
+    """Initializes and uses HRNet model to infer poses from detected bboxes.
     Note that HRNet must be used in conjunction with an object detector applied
     prior.
 

@@ -1,4 +1,4 @@
-# Modifications copyright 2021 AI Singapore
+# Modifications copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ class JDEModel:  # pylint: disable=too-few-public-methods
 
     def predict(
         self, image: np.ndarray
-    ) -> Tuple[List[np.ndarray], List[str], List[float], List[str]]:
+    ) -> Tuple[List[np.ndarray], List[str], List[float], List[int]]:
         """Track objects from image.
 
         Args:

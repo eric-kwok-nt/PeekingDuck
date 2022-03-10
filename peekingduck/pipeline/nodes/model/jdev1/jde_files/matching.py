@@ -1,4 +1,4 @@
-# Modifications copyright 2021 AI Singapore
+# Modifications copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -113,7 +113,7 @@ def embedding_distance(
         return cost_matrix
     det_features = np.asarray([track.curr_feat for track in detections], dtype=np.float)
     track_features = np.asarray([track.smooth_feat for track in tracks], dtype=np.float)
-    # Normalised features
+    # Normalized features
     cost_matrix = np.maximum(0.0, cdist(track_features, det_features, metric))
 
     return cost_matrix

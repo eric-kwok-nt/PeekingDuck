@@ -1,4 +1,4 @@
-# Modifications copyright 2021 AI Singapore
+# Modifications copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -90,14 +90,14 @@ class Tracker:  # pylint: disable=too-many-instance-attributes
 
     def track_objects_from_image(
         self, image: np.ndarray
-    ) -> Tuple[List[np.ndarray], List[str], List[float]]:
+    ) -> Tuple[List[np.ndarray], List[int], List[float]]:
         """Tracks detections from the current video frame.
 
         Args:
             image (np.ndarray): The current video frame.
 
         Returns:
-            (Tuple[List[np.ndarray], List[str], List[float]]): A tuple of
+            (Tuple[List[np.ndarray], List[int], List[float]]): A tuple of
             - Numpy array of detected bounding boxes.
             - List of track IDs.
             - List of detection confidence scores.
@@ -115,7 +115,7 @@ class Tracker:  # pylint: disable=too-many-instance-attributes
             vertical = tlwh[2] / tlwh[3] > 1.6
             if not vertical and tlwh[2] * tlwh[3] > self.config["min_box_area"]:
                 online_tlwhs.append(tlwh)
-                online_ids.append(str(target.track_id))
+                online_ids.append(target.track_id)
                 scores.append(target.score.item())
         if not online_tlwhs:
             return online_tlwhs, online_ids, scores
@@ -135,7 +135,7 @@ class Tracker:  # pylint: disable=too-many-instance-attributes
 
         Args:
             padded_image (torch.Tensor): Preprocessed image with letterbox
-                resizing and colour normalisation.
+                resizing and color normalization.
             image (np.ndarray): The original video frame.
 
         Returns:
@@ -279,7 +279,7 @@ class Tracker:  # pylint: disable=too-many-instance-attributes
             track.mark_removed()
             removed_stracks.append(track)
         # after all these confirmation steps, if a new detection is found, it
-        # is initialised for a new track
+        # is initialized for a new track
         # Step 4: Init new stracks
         for i in unmatched_det_indices:
             track = detections[i]
@@ -305,9 +305,9 @@ class Tracker:  # pylint: disable=too-many-instance-attributes
         ]
         self.tracked_stracks = _combine_stracks(self.tracked_stracks, activated_stracks)
         self.tracked_stracks = _combine_stracks(self.tracked_stracks, refind_stracks)
-        self.lost_stracks = _substract_stracks(self.lost_stracks, self.tracked_stracks)
+        self.lost_stracks = _subtract_stracks(self.lost_stracks, self.tracked_stracks)
         self.lost_stracks.extend(lost_stracks)
-        self.lost_stracks = _substract_stracks(self.lost_stracks, self.removed_stracks)
+        self.lost_stracks = _subtract_stracks(self.lost_stracks, self.removed_stracks)
         self.removed_stracks.extend(removed_stracks)
         self.tracked_stracks, self.lost_stracks = _remove_duplicate_stracks(
             self.tracked_stracks, self.lost_stracks
@@ -388,7 +388,7 @@ class Tracker:  # pylint: disable=too-many-instance-attributes
         padded_image = letterbox(
             image, height=self.input_size[1], width=self.input_size[0]
         )
-        # Normalise RGB
+        # Normalize RGB
         padded_image = padded_image[..., ::-1].transpose(2, 0, 1)
         padded_image = np.ascontiguousarray(padded_image, dtype=np.float32)
         padded_image /= 255.0
@@ -429,7 +429,7 @@ class Tracker:  # pylint: disable=too-many-instance-attributes
     @staticmethod
     def _postprocess(tlwhs: np.ndarray, image_shape: Tuple[int, ...]) -> np.ndarray:
         """Post-processes detection bounding boxes by converting them from
-        [t, l, w, h] to normalised [x1, y1, x2, y2] format which is required by
+        [t, l, w, h] to normalized [x1, y1, x2, y2] format which is required by
         other PeekingDuck draw nodes. (t, l) is the top-left corner, w is
         width, and h is height. (x1, y1) is the top-left corner and (x2, y2) is
         the bottom-right corner.
@@ -440,7 +440,7 @@ class Tracker:  # pylint: disable=too-many-instance-attributes
                 frame.
 
         Returns:
-            (np.ndarray): Bounding boxes in normalised [x1, y1, x2, y2] format.
+            (np.ndarray): Bounding boxes in normalized [x1, y1, x2, y2] format.
         """
         return tlwh2xyxyn(tlwhs, *image_shape)
 
@@ -455,18 +455,12 @@ def _combine_stracks(stracks_1: List[STrack], stracks_2: List[STrack]) -> List[S
     Returns:
         (List[STrack]): Combined list of STrack.
     """
-    exists = {}
-    res = []
-    for track in stracks_1:
-        exists[track.track_id] = True
-        res.append(track)
+    stracks = {track.track_id: track for track in stracks_1}
     for track in stracks_2:
         tid = track.track_id
-        # Only add to the list of the track ID has not added before
-        if not exists.get(tid, False):
-            exists[tid] = True
-            res.append(track)
-    return res
+        if tid not in stracks:
+            stracks[tid] = track
+    return list(stracks.values())
 
 
 def _remove_duplicate_stracks(
@@ -502,9 +496,7 @@ def _remove_duplicate_stracks(
     )
 
 
-def _substract_stracks(
-    stracks_1: List[STrack], stracks_2: List[STrack]
-) -> List[STrack]:
+def _subtract_stracks(stracks_1: List[STrack], stracks_2: List[STrack]) -> List[STrack]:
     """Removes stracks_2 from stracks_1.
 
     Args:

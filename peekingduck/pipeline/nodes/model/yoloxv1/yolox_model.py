@@ -1,4 +1,4 @@
-# Copyright 2021 AI Singapore
+# Copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -73,8 +73,6 @@ class YOLOXModel:
     def detect_ids(self, ids: List[int]) -> None:
         if not isinstance(ids, list):
             raise TypeError("detect_ids has to be a list")
-        if not ids:
-            self.logger.info("Detecting all YOLOX classes")
         self._detect_ids = ids
 
     def predict(

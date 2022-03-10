@@ -1,4 +1,4 @@
-# Copyright 2021 AI Singapore
+# Copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,13 +36,13 @@ class Node(AbstractNode):
         |bboxes|
 
     Outputs:
-        |obj_tags|
+        |obj_attrs|
 
     Configs:
         tracking_type (:obj:`str`): **{"iou", "mosse"}, default="iou"**. |br|
             Type of tracking algorithm to be used. For more information about
-            the trackers, please view the `multi object tracking usecase
-            <use_cases/multi_object_tracking.html>`_.
+            the trackers, please view the :doc:`Multiple Object Tracking use
+            case </use_cases/multiple_object_tracking>`.
         iou_threshold (float): **[0, 1], default=0.1**. |br|
             Minimum IoU value to be used with the matching logic.
         max_lost (int): **[0, sys.maxsize), default=10**. |br|
@@ -63,7 +63,7 @@ class Node(AbstractNode):
 
         Returns:
             outputs (Dict[str, Any]): Tracking IDs of bounding boxes.
-            "obj_tags" key is used for compatibility with draw nodes.
+            "obj_attrs" key is used for compatibility with draw nodes.
         """
         # Potentially use frame_rate here too since IOUTracker has a
         # max_time_lost
@@ -74,7 +74,7 @@ class Node(AbstractNode):
 
         track_ids = self.tracker.track_detections(inputs)
 
-        return {"obj_tags": track_ids}
+        return {"obj_attrs": {"ids": track_ids}}
 
     def _reset_model(self) -> None:
         """Creates a new instance of DetectionTracker."""

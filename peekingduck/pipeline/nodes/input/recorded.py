@@ -1,4 +1,4 @@
-# Copyright 2021 AI Singapore
+# Copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,10 +20,7 @@ from pathlib import Path
 from typing import Any, Dict
 
 from peekingduck.pipeline.nodes.input.utils.preprocess import resize_image
-from peekingduck.pipeline.nodes.input.utils.read import (
-    VideoThread,
-    VideoNoThread,
-)
+from peekingduck.pipeline.nodes.input.utils.read import VideoNoThread, VideoThread
 from peekingduck.pipeline.nodes.node import AbstractNode
 
 
@@ -32,7 +29,7 @@ class Node(AbstractNode):
     """Receives videos/image as inputs.
 
     Inputs:
-        |none|
+        |no_input|
 
     Outputs:
         |img|

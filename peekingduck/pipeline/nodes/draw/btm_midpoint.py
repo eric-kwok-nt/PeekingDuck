@@ -1,4 +1,4 @@
-# Copyright 2021 AI Singapore
+# Copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -28,8 +28,8 @@ class Node(AbstractNode):
 
     The ``draw.btm_midpoint`` node uses the ``bboxes`` from the model
     predictions to draw the bbox predictions onto the image. For better
-    understanding of the usecase, refer to the
-    `zone counting usecase <use_cases/zone_counting.html>`_.
+    understanding of the use case, refer to the :doc:`Zone Counting use case
+    </use_cases/zone_counting>`.
 
     Inputs:
         |img|
@@ -37,7 +37,7 @@ class Node(AbstractNode):
         |btm_midpoint|
 
     Outputs:
-        |none|
+        |no_output|
 
     Configs:
         None.

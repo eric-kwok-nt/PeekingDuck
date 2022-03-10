@@ -1,4 +1,4 @@
-# Modifications copyright 2021 AI Singapore
+# Modifications copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -40,7 +40,7 @@ Modifications include:
     - loss_names
     - losses
     - test_emb
-    - uniform initialisation of batch norm
+    - uniform initialization of batch norm
 - Refactor to remove unused code
     - enumerate in forward()
     - "maxpool" in _create_nodes

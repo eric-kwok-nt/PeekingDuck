@@ -1,4 +1,4 @@
-# Copyright 2021 AI Singapore
+# Copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -18,16 +18,16 @@ Reads a videofeed from a stream, e.g., webcam.
 
 from typing import Any, Dict, Union
 
-from peekingduck.pipeline.nodes.node import AbstractNode
 from peekingduck.pipeline.nodes.input.utils.preprocess import resize_image
 from peekingduck.pipeline.nodes.input.utils.read import VideoNoThread, VideoThread
+from peekingduck.pipeline.nodes.node import AbstractNode
 
 
 class Node(AbstractNode):
     """Receives livestream as inputs.
 
     Inputs:
-        |none|
+        |no_input|
 
     Outputs:
         |img|

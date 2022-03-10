@@ -1,4 +1,4 @@
-# Copyright 2021 AI Singapore
+# Copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ import yaml
 
 from peekingduck.pipeline.nodes.model.movenetv1.movenet_files.predictor import Predictor
 
-TEST_DIR = Path.cwd() / "images" / "testing"
+TEST_DIR = Path.cwd() / "tests" / "data" / "images"
 
 
 @pytest.fixture(params=["t2.jpg"])

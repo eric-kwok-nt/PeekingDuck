@@ -1,4 +1,4 @@
-# Copyright 2021 AI Singapore
+# Copyright 2022 AI Singapore
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -49,8 +49,8 @@ CUSTOM_NODE_DIR = MODULE_DIR / CUSTOM_FOLDER_NAME
 CUSTOM_NODE_CONFIG_DIR = CUSTOM_NODE_DIR / "configs"
 CUSTOM_PKD_NODE_DIR = MODULE_DIR / CUSTOM_FOLDER_NAME / PKD_NODE_TYPE
 CUSTOM_PKD_NODE_CONFIG_DIR = CUSTOM_NODE_CONFIG_DIR / PKD_NODE_TYPE
-RUN_CONFIG_PATH = Path("run_config.yml")
-CUSTOM_RUN_CONFIG_PATH = Path("custom_dir") / "run_config.yml"
+PIPELINE_PATH = Path("pipeline_config.yml")
+CUSTOM_PIPELINE_PATH = Path("custom_dir") / "pipeline_config.yml"
 YML = dict(nodes=["input.live", "model.yolo", "draw.bbox", "output.screen"])
 
 NODE_TYPES = ["input", "model", "dabble", "draw", "output"]
@@ -68,15 +68,15 @@ def available_nodes_msg(type_name=None):
     else:
         node_types = [type_name]
 
-    url_prefix = "https://peekingduck.readthedocs.io/en/stable/"
-    url_postfix = ".html#"
+    url_prefix = "https://peekingduck.readthedocs.io/en/stable/nodes/"
+    url_postfix = ".html#module-"
     for node_type in node_types:
         node_names = [path.stem for path in (PKD_CONFIG_DIR / node_type).glob("*.yml")]
         max_length = len_enumerate(max(enumerate(node_names), key=len_enumerate))
         print(f"\nPeekingDuck has the following {node_type} nodes:", file=output)
         for num, node_name in enumerate(node_names):
             idx = num + 1
-            node_path = f"peekingduck.pipeline.nodes.{node_type}.{node_name}.Node"
+            node_path = f"{node_type}.{node_name}"
             url = f"{url_prefix}{node_path}{url_postfix}{node_path}"
             node_width = max_length + 1 - int(math.log10(idx))
             print(f"{idx}:{node_name: <{node_width}}Info: {url}", file=output)
@@ -108,9 +108,9 @@ def create_node_python(node_dir, node_name, return_statement):
         outfile.write(content)
 
 
-def create_run_config_yaml(nodes, custom_config_path):
+def create_pipeline_yaml(nodes, custom_config_path):
     with open(
-        CUSTOM_RUN_CONFIG_PATH if custom_config_path else RUN_CONFIG_PATH, "w"
+        CUSTOM_PIPELINE_PATH if custom_config_path else PIPELINE_PATH, "w"
     ) as outfile:
         yaml.dump(nodes, outfile, default_flow_style=False)
 
@@ -123,7 +123,7 @@ def get_custom_node_subpaths(node_subdir, node_type, node_name):
 
 
 def init_msg(node_name):
-    return f"Initialising {node_name} node..."
+    return f"Initializing {node_name} node..."
 
 
 def setup_custom_node(node_subdir, node_type, node_name):
@@ -147,7 +147,7 @@ def setup(custom_config_path=False):
     relative_node_dir.mkdir(parents=True)
     relative_config_dir.mkdir(parents=True)
     if custom_config_path:
-        CUSTOM_RUN_CONFIG_PATH.parent.mkdir()
+        CUSTOM_PIPELINE_PATH.parent.mkdir()
     node_config_1 = {
         "input": ["none"],
         "output": ["test_output_1"],
@@ -155,7 +155,7 @@ def setup(custom_config_path=False):
     }
     node_config_2 = {"input": ["test_output_1"], "output": ["pipeline_end"]}
 
-    create_run_config_yaml(NODES, custom_config_path)
+    create_pipeline_yaml(NODES, custom_config_path)
     create_node_python(relative_node_dir, PKD_NODE_NAME, "'test_output_1': None")
     create_node_python(relative_node_dir, PKD_NODE_NAME_2, "'pipeline_end': True")
     create_node_config(relative_config_dir, PKD_NODE_NAME, node_config_1)
@@ -193,8 +193,8 @@ class TestCli:
             )
             assert (parent_dir / DEFAULT_NODE_DIR).exists()
             assert (parent_dir / DEFAULT_NODE_CONFIG_DIR).exists()
-            assert (cwd / RUN_CONFIG_PATH).exists()
-            with open(cwd / RUN_CONFIG_PATH) as infile:
+            assert (cwd / PIPELINE_PATH).exists()
+            with open(cwd / PIPELINE_PATH) as infile:
                 TestCase().assertDictEqual(YML, yaml.safe_load(infile))
 
     def test_init_custom(self, parent_dir, cwd):
@@ -209,8 +209,8 @@ class TestCli:
             )
             assert (parent_dir / CUSTOM_NODE_DIR).exists()
             assert (parent_dir / CUSTOM_NODE_CONFIG_DIR).exists()
-            assert (cwd / RUN_CONFIG_PATH).exists()
-            with open(cwd / RUN_CONFIG_PATH) as infile:
+            assert (cwd / PIPELINE_PATH).exists()
+            with open(cwd / PIPELINE_PATH) as infile:
                 TestCase().assertDictEqual(YML, yaml.safe_load(infile))
 
     def test_run_default(self):
@@ -218,8 +218,7 @@ class TestCli:
         with TestCase.assertLogs("peekingduck.cli.logger") as captured:
             result = CliRunner().invoke(cli, ["run"])
             assert (
-                captured.records[0].getMessage()
-                == "Successfully loaded run_config file."
+                captured.records[0].getMessage() == "Successfully loaded pipeline file."
             )
             assert captured.records[1].getMessage() == init_msg(PKD_NODE)
             assert captured.records[2].getMessage() == init_msg(PKD_NODE_2)
@@ -229,11 +228,10 @@ class TestCli:
         setup(True)
         with TestCase.assertLogs("peekingduck.cli.logger") as captured:
             result = CliRunner().invoke(
-                cli, ["run", "--config_path", CUSTOM_RUN_CONFIG_PATH]
+                cli, ["run", "--config_path", CUSTOM_PIPELINE_PATH]
             )
             assert (
-                captured.records[0].getMessage()
-                == "Successfully loaded run_config file."
+                captured.records[0].getMessage() == "Successfully loaded pipeline file."
             )
             assert captured.records[1].getMessage() == init_msg(PKD_NODE)
             assert captured.records[2].getMessage() == init_msg(PKD_NODE_2)
@@ -251,8 +249,7 @@ class TestCli:
                 cli, ["run", "--node_config", config_update_cli]
             )
             assert (
-                captured.records[0].getMessage()
-                == "Successfully loaded run_config file."
+                captured.records[0].getMessage() == "Successfully loaded pipeline file."
             )
             assert captured.records[1].getMessage() == init_msg(PKD_NODE)
             assert (
@@ -281,7 +278,9 @@ class TestCli:
         print(f"\ntmp_dir={tmp_dir}")
         test_config_path = tmp_dir / "test_config.yml"
         nodes = {
-            "nodes": [{"input.recorded": {"input_dir": "PeekingDuck/images/testing"}}]
+            "nodes": [
+                {"input.recorded": {"input_dir": "PeekingDuck/tests/data/images"}}
+            ]
         }
         with open(test_config_path, "w") as outfile:
             yaml.dump(nodes, outfile, default_flow_style=False)
@@ -313,8 +312,7 @@ class TestCli:
             n = 50  # run test for 50 iterations
             result = CliRunner().invoke(cli, ["run", "--num_iter", n])
             assert (
-                captured.records[0].getMessage()
-                == "Successfully loaded run_config file."
+                captured.records[0].getMessage() == "Successfully loaded pipeline file."
             )
             assert captured.records[1].getMessage() == init_msg(PKD_NODE)
             assert captured.records[2].getMessage() == init_msg(PKD_NODE_2)
