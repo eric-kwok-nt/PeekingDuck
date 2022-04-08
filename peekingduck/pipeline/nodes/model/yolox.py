@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""High performance anchor-free YOLO object detection model"""
+"""🔲 High performance anchor-free YOLO object detection model."""
 
 from typing import Any, Dict
+
+import numpy as np
 
 from peekingduck.pipeline.nodes.model.yoloxv1 import yolox_model
 from peekingduck.pipeline.nodes.node import AbstractNode
@@ -24,19 +26,20 @@ class Node(AbstractNode):  # pylint: disable=too-few-public-methods
     """Initializes and uses YOLOX to infer from an image frame.
 
     The YOLOX node is capable detecting objects from 80 categories. The table
-    of object categories can be found :ref:`here <general-object-detection-ids>`.
-    The ``"yolox-tiny"`` model is used by default and can be changed to one of
-    ``("yolox-tiny", "yolox-s", "yolox-m", "yolox-l")``.
+    of object categories can be found
+    :ref:`here <general-object-detection-ids>`. The ``"yolox-tiny"`` model is
+    used by default and can be changed to one of ``("yolox-tiny", "yolox-s",
+    "yolox-m", "yolox-l")``.
 
     Inputs:
-        |img|
+        |img_data|
 
     Outputs:
-        |bboxes|
+        |bboxes_data|
 
-        |bbox_labels|
+        |bbox_labels_data|
 
-        |bbox_scores|
+        |bbox_scores_data|
 
     Configs:
         model_type (:obj:`str`): **{"yolox-tiny", "yolox-s", "yolox-m",
@@ -57,8 +60,9 @@ class Node(AbstractNode):  # pylint: disable=too-few-public-methods
             Bounding boxes with confidence score (product of objectness score
             and classification score) below the threshold will be discarded.
         agnostic_nms (:obj:`bool`): **default = True**. |br|
-            Flag to determine if class agnostic NMS (torchvision.ops.nms) or
-            class aware NMS (torchvision.ops.batched_nms) should be used.
+            Flag to determine if class-agnostic NMS (``torchvision.ops.nms``)
+            or class-aware NMS (``torchvision.ops.batched_nms``) should be
+            used.
         half (:obj:`bool`): **default = False**. |br|
             Flag to determine if half-precision floating-point should be used
             for inference.
@@ -93,6 +97,8 @@ class Node(AbstractNode):  # pylint: disable=too-few-public-methods
                 and `bbox_scores`.
         """
         bboxes, labels, scores = self.model.predict(inputs["img"])
+        bboxes = np.clip(bboxes, 0, 1)
+
         outputs = {"bboxes": bboxes, "bbox_labels": labels, "bbox_scores": scores}
 
         return outputs

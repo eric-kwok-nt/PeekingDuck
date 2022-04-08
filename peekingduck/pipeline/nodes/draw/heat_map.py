@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""
-Superimposes a heat map over an image
-"""
+"""Superimposes a heat map over an image."""
 
 from typing import Any, Dict
 
@@ -27,17 +25,18 @@ from peekingduck.pipeline.nodes.node import AbstractNode
 class Node(AbstractNode):  # pylint: disable=too-few-public-methods
     """Superimposes a heat map over an image.
 
-    The ``draw.heat_map`` node helps to identify areas that are more crowded. Areas
-    that are more crowded are highlighted in red while areas that are less crowded are
-    highlighted in blue.
+    The :mod:`draw.heat_map` node helps to identify areas that are more
+    crowded. Areas that are more crowded are highlighted in red while areas
+    that are less crowded are highlighted in blue.
 
     Inputs:
-        |img|
+        |img_data|
 
-        |density_map|
+        |density_map_data|
+        This is produced by nodes such as :mod:`model.csrnet`.
 
     Outputs:
-        |img|
+        |img_data|
 
     Configs:
         None.

@@ -21,6 +21,7 @@ import logging
 from pathlib import Path
 from typing import Any, Dict, List, Tuple
 
+import cv2
 import numpy as np
 import tensorflow as tf
 
@@ -54,8 +55,8 @@ class Detector:
             f"IDs being detected: {self.config['detect_ids']} \n\t"
             f"Max Detections per class: {self.config['max_output_size_per_class']}, \n\t"
             f"Max Total Detections: {self.config['max_total_size']}, \n\t"
-            f"IOU threshold: {self.config['yolo_iou_threshold']}, \n\t"
-            f"Score threshold: {self.config['yolo_score_threshold']}"
+            f"IOU threshold: {self.config['iou_threshold']}, \n\t"
+            f"Score threshold: {self.config['score_threshold']}"
         )
 
         return self._load_yolo_graph(model_path)
@@ -101,9 +102,8 @@ class Detector:
 
         classes = classes.numpy()[0]
         classes = classes[:len0]
-        mask1 = np.isin(
-            classes, tuple(object_ids)
-        )  # only identify objects we are interested in
+        # only identify objects we are interested in
+        mask1 = np.isin(classes, tuple(object_ids))
         classes = tf.boolean_mask(classes, mask1)
 
         scores = scores.numpy()[0]
@@ -128,7 +128,6 @@ class Detector:
             - nums: number of valid bboxes. Only nums[0] should be used. The rest
                     are paddings.
         """
-        # image = image[..., ::-1]  # swap from bgr to rgb
         pred = self.yolo(image)[-1]
         bboxes = pred[:, :, :4].numpy()
         bboxes[:, :, [0, 1]] = bboxes[:, :, [1, 0]]  # swapping x and y axes
@@ -143,19 +142,21 @@ class Detector:
             ),
             max_output_size_per_class=self.config["max_output_size_per_class"],
             max_total_size=self.config["max_total_size"],
-            iou_threshold=self.config["yolo_iou_threshold"],
-            score_threshold=self.config["yolo_score_threshold"],
+            iou_threshold=self.config["iou_threshold"],
+            score_threshold=self.config["score_threshold"],
         )
         return boxes, scores, classes, nums
 
     @staticmethod
     def _prepare_image_from_camera(image: np.ndarray) -> tf.Tensor:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = image.astype(np.float32)
         image = tf.convert_to_tensor(image)
         return image
 
     @staticmethod
     def _prepare_image_from_file(image: np.ndarray) -> tf.Tensor:
+        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
         image = tf.image.decode_image(image, channels=3)
         return image
 
@@ -172,7 +173,7 @@ class Detector:
         Return:
             boxes (np.array): an array of bounding box with definition like
                 (x1, y1, x2, y2), in a coordinate system with original point in
-                the left top corner
+                the top-left corner
         """
         # 1. prepare image
         image = self._prepare_image_from_camera(image)

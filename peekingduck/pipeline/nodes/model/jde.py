@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""Human detection and tracking model."""
+"""🎯 Joint Detection and Embedding model for human detection and tracking."""
 
 from typing import Any, Dict
+
+import numpy as np
 
 from peekingduck.pipeline.nodes.model.jdev1 import jde_model
 from peekingduck.pipeline.nodes.node import AbstractNode
@@ -29,16 +31,18 @@ class Node(AbstractNode):
     shared neural network.
 
     Inputs:
-        |img|
+        |img_data|
 
     Outputs:
-        |bboxes|
+        |bboxes_data|
 
-        |bbox_labels|
+        |bbox_labels_data|
 
-        |bbox_scores|
+        |bbox_scores_data|
 
-        |obj_attrs|
+        |obj_attrs_data|
+        :mod:`model.fairmot` produces the ``ids`` attribute which contains the
+        tracking IDs of the detections.
 
     Configs:
         weights_parent_dir (:obj:`Optional[str]`): **default = null**. |br|
@@ -52,10 +56,10 @@ class Node(AbstractNode):
             Object confidence score threshold.
         min_box_area (:obj:`int`): **default = 200**. |br|
             Minimum value for area of detected bounding box. Calculated by
-            width * height.
+            :math:`width \\times height`.
         track_buffer (:obj:`int`): **default = 30**. |br|
-            Threshold to remove track if track is lost for more frames
-            than value.
+            Threshold to remove track if track is lost for more frames than
+            value.
 
     References:
         Towards Real-Time Multi-Object Tracking:
@@ -102,6 +106,8 @@ class Node(AbstractNode):
             self._reset_model()
 
         bboxes, bbox_labels, bbox_scores, track_ids = self.model.predict(inputs["img"])
+        bboxes = np.clip(bboxes, 0, 1)
+
         return {
             "bboxes": bboxes,
             "bbox_labels": bbox_labels,

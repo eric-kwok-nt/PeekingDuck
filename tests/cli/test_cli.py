@@ -29,6 +29,7 @@ from click.testing import CliRunner
 
 from peekingduck import __version__
 from peekingduck.cli import cli
+from peekingduck.declarative_loader import PEEKINGDUCK_NODE_TYPES
 
 UNIQUE_SUFFIX = "".join(random.choice(string.ascii_lowercase) for _ in range(8))
 CUSTOM_FOLDER_NAME = f"custom_nodes_{UNIQUE_SUFFIX}"
@@ -51,9 +52,19 @@ CUSTOM_PKD_NODE_DIR = MODULE_DIR / CUSTOM_FOLDER_NAME / PKD_NODE_TYPE
 CUSTOM_PKD_NODE_CONFIG_DIR = CUSTOM_NODE_CONFIG_DIR / PKD_NODE_TYPE
 PIPELINE_PATH = Path("pipeline_config.yml")
 CUSTOM_PIPELINE_PATH = Path("custom_dir") / "pipeline_config.yml"
-YML = dict(nodes=["input.live", "model.yolo", "draw.bbox", "output.screen"])
+YML = dict(
+    nodes=[
+        {
+            "input.visual": {
+                "source": "https://storage.googleapis.com/peekingduck/videos/wave.mp4"
+            }
+        },
+        "model.posenet",
+        "draw.poses",
+        "output.screen",
+    ]
+)
 
-NODE_TYPES = ["input", "model", "dabble", "draw", "output"]
 PKD_DIR = Path(__file__).resolve().parents[2] / "peekingduck"
 PKD_CONFIG_DIR = PKD_DIR / "configs"
 
@@ -64,7 +75,7 @@ def available_nodes_msg(type_name=None):
 
     output = io.StringIO()
     if type_name is None:
-        node_types = NODE_TYPES
+        node_types = PEEKINGDUCK_NODE_TYPES
     else:
         node_types = [type_name]
 
@@ -195,7 +206,8 @@ class TestCli:
             assert (parent_dir / DEFAULT_NODE_CONFIG_DIR).exists()
             assert (cwd / PIPELINE_PATH).exists()
             with open(cwd / PIPELINE_PATH) as infile:
-                TestCase().assertDictEqual(YML, yaml.safe_load(infile))
+                config_file = yaml.safe_load(infile)
+                TestCase().assertDictEqual(YML, config_file)
 
     def test_init_custom(self, parent_dir, cwd):
         with TestCase.assertLogs("peekingduck.cli.logger") as captured:
@@ -267,7 +279,7 @@ class TestCli:
         assert result.output == available_nodes_msg()
 
     def test_nodes_single(self):
-        for node_type in NODE_TYPES:
+        for node_type in PEEKINGDUCK_NODE_TYPES:
             result = CliRunner().invoke(cli, ["nodes", node_type])
             assert result.exit_code == 0
             assert result.output == available_nodes_msg(node_type)
@@ -278,9 +290,7 @@ class TestCli:
         print(f"\ntmp_dir={tmp_dir}")
         test_config_path = tmp_dir / "test_config.yml"
         nodes = {
-            "nodes": [
-                {"input.recorded": {"input_dir": "PeekingDuck/tests/data/images"}}
-            ]
+            "nodes": [{"input.visual": {"source": "PeekingDuck/tests/data/images"}}]
         }
         with open(test_config_path, "w") as outfile:
             yaml.dump(nodes, outfile, default_flow_style=False)

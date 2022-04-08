@@ -7,7 +7,7 @@ Documentation Convention
 
 .. _documentation_convention:
 
-Parts of this documentation and the tutorials are run from the command line
+Parts of this documentation and the tutorials are run from the command-line
 interface (CLI) environment, e.g., via `Terminal` in Linux/macOS, or via
 `Anaconda` in Windows.
 There will be examples of commands you need to type as inputs and text that
@@ -23,7 +23,7 @@ The following text color scheme is used to illustrate these different contexts:
 +----------------+------------------------------+-----------------------------------+
 | :green:`Green` | User input: what you type in | > :green:`peekingduck -\-version` |
 +----------------+------------------------------+-----------------------------------+
-| Black          | PeekingDuck's output         | peekingduck, version v1.1.1       |
+| Black          | PeekingDuck's output         | peekingduck, version v1.2.0       |
 +----------------+------------------------------+-----------------------------------+
 
 The command prompt is assumed to be the symbol ``>``,
@@ -35,5 +35,5 @@ Putting it altogether, a sample terminal session looks like this:
 .. admonition:: Terminal Session
 
     | \ :blue:`[~user/src]` \ > \ :green:`peekingduck -\-version` \
-    | peekingduck, version v1.1.1
+    | peekingduck, version v1.2.0
 
